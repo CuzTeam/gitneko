@@ -222,8 +222,10 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 	private _workflow!: DetailsWorkflowController;
 
 	private _servicesResolved = false;
-	private _pendingCompare?: Parameters<GlGraphDetailsPanel['openCompareMode']>[0];
-	private _suppressSheetAnimation = false;
+	private _pendingCompare?: {
+		params: Parameters<GlGraphDetailsPanel['openCompareMode']>[0];
+		onReady?: () => void;
+	};
 
 	private _lastPushedWip?: unknown;
 	private _lastBranchState?: unknown;
@@ -576,19 +578,23 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 	 *  explicit left/right refs (e.g. from a sidebar tree compare action). The current graph
 	 *  selection is left untouched; both sides of the comparison are driven by the supplied
 	 *  overrides. */
-	openCompareMode(params: {
-		repoPath: string;
-		leftRef?: string;
-		leftRefType?: 'branch' | 'tag' | 'commit';
-		rightRef: string;
-		rightRefType?: 'branch' | 'tag' | 'commit';
-		includeWorkingTree?: boolean;
-	}): void {
+	openCompareMode(
+		params: {
+			repoPath: string;
+			leftRef?: string;
+			leftRefType?: 'branch' | 'tag' | 'commit';
+			rightRef: string;
+			rightRefType?: 'branch' | 'tag' | 'commit';
+			includeWorkingTree?: boolean;
+		},
+		onReady?: () => void,
+	): boolean {
 		if (this._workflow == null) {
-			this._pendingCompare = params;
-			return;
+			this._pendingCompare = { params: params, onReady: onReady };
+			return false;
 		}
 
+		onReady?.();
 		const selection: DetailsSelection = {
 			...this.currentSelection(),
 			repoPath: params.repoPath,
@@ -600,6 +606,7 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 			rightRefType: params.rightRefType,
 			includeWorkingTree: params.includeWorkingTree,
 		});
+		return true;
 	}
 
 	/** Entry point for the WIP-row agent indicator. Expands the agents section.
@@ -1543,13 +1550,9 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 		this._workflow = new DetailsWorkflowController(this, this._actions);
 
 		if (this._pendingCompare != null) {
-			const pending = this._pendingCompare;
+			const { params, onReady } = this._pendingCompare;
 			this._pendingCompare = undefined;
-			this._suppressSheetAnimation = true;
-			this.openCompareMode(pending);
-			void this.updateComplete.then(() => {
-				this._suppressSheetAnimation = false;
-			});
+			this.openCompareMode(params, onReady);
 		}
 
 		void this._actions.fetchCapabilities();
@@ -1683,7 +1686,6 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 						aria-label="Compare"
 						sheet-title="Comparing References"
 						close-label="Close"
-						?no-animate=${this._suppressSheetAnimation}
 						@gl-detail-sheet-close=${this.handleCloseCompareSheet}
 					>
 						<gl-action-chip

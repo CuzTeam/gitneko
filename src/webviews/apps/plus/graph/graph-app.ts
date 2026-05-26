@@ -503,28 +503,37 @@ export class GraphApp extends SignalWatcher(LitElement) {
 		this._selectedCommit = { sha: sha, repoPath: repoPath };
 		this._selectedCommits = undefined;
 
-		this.setDetailsVisible(true, 'request-mode');
-		this.ensureDetailsPosition();
+		const showDetails = () => {
+			this.setDetailsVisible(true, 'request-mode');
+			this.ensureDetailsPosition();
+		};
 
+		if (action === 'open-compare') {
+			// For open-compare, defer the panel open until the workflow controller is ready
+			// so the details panel and compare sheet appear as a single atomic animation.
+			await this.updateComplete;
+			const compareParams =
+				target != null
+					? {
+							repoPath: repoPath,
+							leftRef: this.graphState.branch?.name ?? 'HEAD',
+							rightRef: sha,
+							includeWorkingTree: true,
+						}
+					: {
+							repoPath: repoPath,
+							rightRef: this.graphState.branch?.name ?? 'HEAD',
+							rightRefType: 'branch' as const,
+							includeWorkingTree: true,
+						};
+			this.detailsPanelEl?.openCompareMode(compareParams, showDetails);
+			return;
+		}
+
+		showDetails();
 		await this.updateComplete;
 		if (action === 'enter-review' || action === 'enter-compose') {
 			this.detailsPanelEl?.enterModeForWip(action === 'enter-review' ? 'review' : 'compose', repoPath, sha);
-		} else if (action === 'open-compare') {
-			if (target != null) {
-				this.detailsPanelEl?.openCompareMode({
-					repoPath: repoPath,
-					leftRef: this.graphState.branch?.name ?? 'HEAD',
-					rightRef: sha,
-					includeWorkingTree: true,
-				});
-			} else {
-				this.detailsPanelEl?.openCompareMode({
-					repoPath: repoPath,
-					rightRef: this.graphState.branch?.name ?? 'HEAD',
-					rightRefType: 'branch',
-					includeWorkingTree: true,
-				});
-			}
 		}
 
 		// Seed the WIP details commit input AFTER the panel has reconciled to the target row —
