@@ -3,6 +3,7 @@ import type { AIProviderDescriptor } from './models/model.js';
 export type AIProviders =
 	| 'anthropic'
 	| 'azure'
+	| 'cuz-ai'
 	| 'deepseek'
 	| 'gemini'
 	| 'github'
@@ -81,6 +82,13 @@ export const mistralProviderDescriptor: AIProviderDescriptor<'mistral'> = {
 export const deepSeekProviderDescriptor: AIProviderDescriptor<'deepseek'> = {
 	id: 'deepseek',
 	name: 'DeepSeek',
+	primary: false,
+	requiresAccount: true,
+	requiresUserKey: true,
+} as const;
+export const cuzAIProviderDescriptor: AIProviderDescriptor<'cuz-ai'> = {
+	id: 'cuz-ai',
+	name: 'Cuz-AI',
 	primary: false,
 	requiresAccount: true,
 	requiresUserKey: true,

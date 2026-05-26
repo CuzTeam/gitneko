@@ -70,6 +70,7 @@ export interface OrgAIConfig {
 export type GkDevAIProviderType =
 	| 'anthropic'
 	| 'azure'
+	| 'cuzai'
 	| 'deepseek'
 	| 'github_copilot'
 	| 'gitkraken_ai'
@@ -90,6 +91,8 @@ export function fromGkDevAIProviderType(type: unknown): AIProviders | never {
 			return 'anthropic';
 		case 'azure':
 			return 'azure';
+		case 'cuzai':
+			return 'cuz-ai';
 		case 'deepseek':
 			return 'deepseek';
 		case 'github_copilot':

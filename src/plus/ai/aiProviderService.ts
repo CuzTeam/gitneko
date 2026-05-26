@@ -6,6 +6,7 @@ import type { AIPrimaryProviders, AIProviderAndModel, AIProviders, SupportedAIMo
 import {
 	anthropicProviderDescriptor,
 	azureProviderDescriptor,
+	cuzAIProviderDescriptor,
 	deepSeekProviderDescriptor,
 	geminiProviderDescriptor,
 	githubProviderDescriptor,
@@ -257,6 +258,16 @@ const supportedAIProviders = new Map<AIProviders, AIProviderDescriptorWithType>(
 				async () =>
 					(await import(/* webpackChunkName: "ai" */ '@gitlens/ai/providers/githubModelsProvider.js'))
 						.GitHubModelsProvider,
+			),
+		},
+	],
+	[
+		'cuz-ai',
+		{
+			...cuzAIProviderDescriptor,
+			type: lazy(
+				async () =>
+					(await import(/* webpackChunkName: "ai" */ '@gitlens/ai/providers/cuzAIProvider.js')).CuzAIProvider,
 			),
 		},
 	],
