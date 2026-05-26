@@ -518,7 +518,12 @@ export class GraphApp extends SignalWatcher(LitElement) {
 					includeWorkingTree: true,
 				});
 			} else {
-				this.detailsPanelEl?.openCompare(repoPath);
+				this.detailsPanelEl?.openCompareMode({
+					repoPath: repoPath,
+					rightRef: this.graphState.branch?.name ?? 'HEAD',
+					rightRefType: 'branch',
+					includeWorkingTree: true,
+				});
 			}
 		}
 

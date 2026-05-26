@@ -570,25 +570,13 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 		this._workflow.cancelOperation(mode);
 	};
 
-	/** External entry point — opens compare mode using the current WIP selection without
-	 *  explicit ref overrides. The workflow controller's WIP detection seeds both sides
-	 *  (current branch as Compare, merge target as Base). Used by the walkthrough CTA
-	 *  when no specific graph row target is available. */
-	openCompare(repoPath: string): void {
-		const selection: DetailsSelection = {
-			...this.currentSelection(),
-			repoPath: repoPath,
-		};
-		this._workflow.openCompare(selection);
-	}
-
 	/** External entry point — invoked when the extension requests entering compare mode with
 	 *  explicit left/right refs (e.g. from a sidebar tree compare action). The current graph
 	 *  selection is left untouched; both sides of the comparison are driven by the supplied
 	 *  overrides. */
 	openCompareMode(params: {
 		repoPath: string;
-		leftRef: string;
+		leftRef?: string;
 		leftRefType?: 'branch' | 'tag' | 'commit';
 		rightRef: string;
 		rightRefType?: 'branch' | 'tag' | 'commit';
