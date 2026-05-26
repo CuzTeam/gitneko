@@ -195,6 +195,11 @@ export class GlDetailSheet extends LitElement {
 				}
 			}
 
+			:host([no-animate]) .sheet,
+			:host([no-animate]) .scrim {
+				animation: none;
+			}
+
 			@media (prefers-reduced-motion: reduce) {
 				.sheet,
 				.scrim {

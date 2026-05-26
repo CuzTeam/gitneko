@@ -223,6 +223,7 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 
 	private _servicesResolved = false;
 	private _pendingCompare?: Parameters<GlGraphDetailsPanel['openCompareMode']>[0];
+	private _suppressSheetAnimation = false;
 
 	private _lastPushedWip?: unknown;
 	private _lastBranchState?: unknown;
@@ -1544,7 +1545,11 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 		if (this._pendingCompare != null) {
 			const pending = this._pendingCompare;
 			this._pendingCompare = undefined;
+			this._suppressSheetAnimation = true;
 			this.openCompareMode(pending);
+			void this.updateComplete.then(() => {
+				this._suppressSheetAnimation = false;
+			});
 		}
 
 		void this._actions.fetchCapabilities();
@@ -1678,6 +1683,7 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 						aria-label="Compare"
 						sheet-title="Comparing References"
 						close-label="Close"
+						?no-animate=${this._suppressSheetAnimation}
 						@gl-detail-sheet-close=${this.handleCloseCompareSheet}
 					>
 						<gl-action-chip
