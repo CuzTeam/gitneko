@@ -7177,7 +7177,9 @@ export class GraphWebviewProvider implements WebviewProvider<State, State, Graph
 			details: {
 				...storedPanels?.details,
 				visible:
-					this._pendingAction != null && this._pendingAction.action !== 'scope-to-branch'
+					this._pendingAction != null &&
+					this._pendingAction.action !== 'scope-to-branch' &&
+					this._pendingAction.action !== 'open-compare'
 						? true
 						: (storedPanels?.details?.visible ?? true),
 			},
