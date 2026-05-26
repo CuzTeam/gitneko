@@ -222,6 +222,7 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 	private _workflow!: DetailsWorkflowController;
 
 	private _servicesResolved = false;
+	private _pendingCompare?: Parameters<GlGraphDetailsPanel['openCompareMode']>[0];
 
 	private _lastPushedWip?: unknown;
 	private _lastBranchState?: unknown;
@@ -582,6 +583,11 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 		rightRefType?: 'branch' | 'tag' | 'commit';
 		includeWorkingTree?: boolean;
 	}): void {
+		if (this._workflow == null) {
+			this._pendingCompare = params;
+			return;
+		}
+
 		const selection: DetailsSelection = {
 			...this.currentSelection(),
 			repoPath: params.repoPath,
@@ -1534,6 +1540,12 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 		// fires `hostConnected` immediately (since we're already connected), which sets up
 		// the repo-change subscription without an extra call here.
 		this._workflow = new DetailsWorkflowController(this, this._actions);
+
+		if (this._pendingCompare != null) {
+			const pending = this._pendingCompare;
+			this._pendingCompare = undefined;
+			this.openCompareMode(pending);
+		}
 
 		void this._actions.fetchCapabilities();
 		// Fetched eagerly (not gated on isWip) because resolveServices runs once on
